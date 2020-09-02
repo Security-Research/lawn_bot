@@ -1,6 +1,13 @@
 
-import time
+import os
+def get_app_list():
+    path_dir='./testing_app'
+    file_list = os.listdir(path_dir)
+    python_list=[]
+    for file_name in file_list:
+        if finder(file_name,'.py') and not finder(file_name,'__init__'):
+            python_list.append(file_name)
+    return (python_list)
 
-for i in range(0,10000000):
-    time.sleep(0.2)
-    print(i)
+def finder(target,ob):
+    if str(target).find(str(ob)) >= 0:
