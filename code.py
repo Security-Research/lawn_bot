@@ -1,31 +1,19 @@
-import os
-from utils.parsing import finder
-from utils.out import bold_print,u_print,critical
-import json
-def read_analysis(obj,app_name):
-    lib_dir='analysis'
-    data=''
-    data += '-' * 100 + '\n'
-    if obj == 'res':
-        with open('.tmp' + "/" + app_name + '.res.json') as json_file:
-            json_data = json.load(json_file)
-        for v in json_data:
-            name = v
-            msg="{0} - {1}\n".format(name,json_data[name])
-            data+=msg
-    if obj=='file':
-        with open(lib_dir + "/" + app_name+'.lib.result') as json_file:
-            data=json_file.read(1000200000)
-    if obj=='system':
-        with open('.tmp' + "/" + app_name+'.syscall') as json_file:
-            data=json_file.read(1000200000)
-    if obj == 'dy':
-        with open('.tmp' + "/" + app_name + '.ltrace') as json_file:
-            data = json_file.read(1000200000)
+from ctypes import *
+import time
+while(True):
 
-    if obj=='all':
-        data += "*" * 10 + " 1.Resource" + "*" * 10+'\n'
-        data+='-'*100+'\n'
-        with open('.tmp' + "/" + app_name + '.res.json') as json_file:
-            json_data = json.load(json_file)
-        for v in json_data:
+    #load the shared object file
+    adder = CDLL('./testing_app/adder.so')
+
+    #Find sum of integers
+    res_int = adder.add_int(4,5)
+    msg="Sum of 4 and 5 = " + str(res_int)
+    print(msg)
+
+    #Find sum of floats
+    a = c_float(5.5)
+    b = c_float(4.1)
+
+    add_float = adder.add_float
+    add_float.restype = c_float
+    msg= "Sum of 5.5 and 4.1 = ", str(add_float(a, b))
