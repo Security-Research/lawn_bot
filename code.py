@@ -1,19 +1,41 @@
-from ctypes import *
-import time
-while(True):
+import subprocess, getpass, os
+from pwd import getpwnam
+from utils.exception import CgroupsException,BASE_CGROUPS
+from core.user import create_cgroups, get_user_info
+import logging
 
-    #load the shared object file
-    adder = CDLL('./testing_app/adder.so')
+CONTROL = [
+    'cpu',
+    'memory',
+]
 
-    #Find sum of integers
-    res_int = adder.add_int(4,5)
-    msg="Sum of 4 and 5 = " + str(res_int)
-    print(msg)
+logger = logging.getLogger(__name__)
+CPU_DEFAULT = 1024
+MEMORY_DEFAULT = 1
 
-    #Find sum of floats
-    a = c_float(5.5)
-    b = c_float(4.1)
 
-    add_float = adder.add_float
-    add_float.restype = c_float
-    msg= "Sum of 5.5 and 4.1 = ", str(add_float(a, b))
+class Cgroup(object):
+    def __init__(self, cgroups_name, target='all', user='syscore'):
+        self.cgroups_name = cgroups_name
+        self.user = user
+        self.target = ''
+        self.u_cgroups = {}
+        self.target = [c for c in target if c in CONTROL]
+        system = os.listdir(BASE_CGROUPS)
+
+        for h in self.target:  #
+            if h not in system:
+                exit(-1)
+            user_cgroup = os.path.join(BASE_CGROUPS, h, self.user)
+            self.u_cgroups[h] = user_cgroup
+        create_cgroups(cgroups_name, script=False)
+        self.cgroups = {}
+
+        for h, user_cgroup in self.u_cgroups.items():
+            cgroup = os.path.join(user_cgroup, self.cgroups_name)
+            if not os.path.exists(cgroup):
+                os.mkdir(cgroup)
+            self.cgroups[h] = cgroup
+
+    def _get_file(self, hierarchy, file_name):
+        return os.path.join(self.cgroups[hierarchy], file_name)
