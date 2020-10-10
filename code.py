@@ -1,6 +1,18 @@
+import argparse
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
+from core.report import report
+from core.manager import reset
+from core.execute import execute
+
+
+def isint(a):
+
+    if int(a):
+        return 1
+    else:
+        return 0
+
+def get_arguments():
+    return [
+    ("--start", "Start a Thermometer deamon"),
+    ("--reporter", "Get a reporter"),
