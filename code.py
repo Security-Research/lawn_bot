@@ -1,19 +1,30 @@
-import threading
 import os
-import time
-import json
+from utils.out import info,critical
 
 
-import os
-from utils.parsing import finder
-import json
-from utils.out import u_print,analysis,bold_print
-from core.dy_tracing import ltracing
-def tracing_analysis():
-    msg='\n\n'+"*"*10+" 3. System call에 대한 연계 분석 "+"*"*10
-    bold_print(msg)
-    lib_dir='analysis'
-    file_list = os.listdir(lib_dir)
-    node_pool=[]
-    json_list=[]
-    for f_name in file_list:
+
+def createFolder(directory):
+    try:
+        if not os.path.exists(directory):
+
+            os.mkdir(directory)
+            info("Created directory",directory)
+    except OSError:
+        print('Error: Creating directory. ' + directory)
+
+def removeFolder(directory):
+    try:
+        if os.path.exists(directory):
+            os.rmdir(directory)
+            critical("Remove directory", directory)
+    except:
+        print('Error: Removing directory. ' + directory)
+def chmod():
+    os.system('chmod 777 core/syscall')
+def init():
+    createFolder('.tmp')
+    createFolder('analysis')
+    chmod()
+
+def reset():
+    removeFolder('.tmp')
