@@ -1,41 +1,44 @@
-#! /usr/python3
-# -*- coding:utf-8 -*-
+import argparse
 
-import os,sys
-import logging
-from pwd import getpwnam
+from core.report import report
+from core.manager import reset
+from core.execute import execute
 
-from utils.exception import CgroupsException,BASE_CGROUPS
 
-logger = logging.getLogger(__name__)
+def isint(a):
 
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logstream = logging.StreamHandler()
-logstream.setFormatter(formatter)
-logger.addHandler(logstream)
-logger.setLevel(logging.INFO)
-def log(type,msg):
-    if type=='INFO':
-        logger.info('{0}'.format(msg))
-    elif type=='WARN':
-        logger.info('{0}'.format(msg))
-
-def get_user_info(user):
-    try:
-        user_system = getpwnam(user)
-    except KeyError:
-        raise CgroupsException("User %s doesn't exists" % user)
+    if int(a):
+        return 1
     else:
-        uid = user_system.pw_uid
-        gid = user_system.pw_gid
-    return uid, gid
+        return 0
+
+def get_arguments():
+    return [
+    ("--start", "Start a Thermometer deamon"),
+    ("--reporter", "Get a reporter"),
+    ("--reset","Reset a Thermometer deamon")
+    ]
 
 
-def create_cgroups(user, script=True):
-    #logger.info('Creating cgroups sub-directories for  %s' % user)
+def add_arguments():
+    parser=argparse.ArgumentParser(description="Thermometer by syscore")
+    for argument in get_arguments():
+        parser.add_argument(argument[0], help=argument[1], action="store_true")
+    parser.add_argument("-s", action='store', dest='sec', help='running second',default=10)
 
-    try:
-        hierarchies = os.listdir(BASE_CGROUPS)
-    except OSError as e:
-        if e.errno == 2:
+    return parser.parse_args()
+
+def commands():
+    args = add_arguments()
+    sec=args.sec
+    if args.start:
+        if not isint(sec):
+            print("sec is int")
+        #print("start",sec)
+        execute(sec)
+        #start(sec)
+    elif args.reporter:
+        #print("reporter")
+        report()
+        #report()
+    elif args.reset:
