@@ -1,4 +1,14 @@
+import os
+from utils.out import info,critical
 
-import time
 
-for i in range(0,10000000):
+
+def createFolder(directory):
+    try:
+        if not os.path.exists(directory):
+
+            os.mkdir(directory)
+            info("Created directory",directory)
+    except OSError:
+        print('Error: Creating directory. ' + directory)
+
