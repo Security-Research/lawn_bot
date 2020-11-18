@@ -1,11 +1,8 @@
-
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+import os
+from utils.parsing import finder
+from utils.out import bold_print,u_print,critical
+import json
+def read_analysis(obj,app_name):
+    lib_dir='analysis'
+    data=''
+    data += '-' * 100 + '\n'
