@@ -1,8 +1,16 @@
 import os
-from utils.parsing import finder
-from utils.out import bold_print,u_print,critical
-import json
-def read_analysis(obj,app_name):
-    lib_dir='analysis'
-    data=''
-    data += '-' * 100 + '\n'
+import subprocess
+support_interpreter='/usr/bin/python3'
+import threading
+import time
+from utils.out import info,warning,critical
+from core.lib_analysis import get_lib
+from core.tracing import tracing
+from core.dy_tracing import ltracing
+kill_time=10
+
+def poll(target,pg):
+    #warning("Analysis",""+str(target))
+    while pg.poll() == None:
+        out = pg.stdout.readline()
+        time.sleep(kill_time)
