@@ -1,73 +1,31 @@
-from utils.parsing import get_app_list
-from core.run import run_app
-from utils.out import info,warning,critical
-from core.cgroups import Cgroup
-from utils.out import warning,u_print,critical,analysis,bold_print
+import threading
 import os
-from utils.parsing import finder
 import time
 import json
 
 
-def resource_usage(app_name,pid):
-
-    cg=Cgroup(app_name)
-    cg.add_process(app_name,pid)
-    usage_list={'cache':[], 'rss':[],'usage':[], 'failcnt':[],'pgpgin':[], 'pgpgout':[]}
-
-    cnt =0
-    for i in range(10):
-        usage_list['cache'].append(cg.get_memory_stat(app_name,'cache')) #byte
-        usage_list['rss'].append(cg.get_memory_stat(app_name,'rss')) #byte
-        usage_list['usage'].append(cg.get_memory_info(app_name,'usage_in_bytes')) #byte
-        usage_list['failcnt'].append(cg.get_memory_info(app_name, 'usage_in_bytes')) #cnt
-        usage_list['pgpgin'].append(cg.get_memory_stat(app_name,'pgpgin')) #cnt
-        usage_list['pgpgout'].append(cg.get_memory_stat(app_name,'pgpgout')) #cnt
-        cnt += 1
-        time.sleep(1)
-    usage_list['max_usage']=cg.get_memory_info(app_name,'max_usage_in_bytes')
-
-    #print(usage_list)
-
-    with open(".tmp/" + app_name + ".res.json", "w", encoding='UTF-8') as json_file:
-        json.dump(usage_list, json_file)
-
-    #json
-    res_dic = {}
-    for key in usage_list.keys():
-        if key=='cache' or key=='rss' or key=='usage':
-            tmp=sum(usage_list[key])//cnt//1024
-        elif key=='max_usage':
-            tmp=usage_list[key]//1024
-        else:
-            tmp=sum(usage_list[key])//cnt
-        res_dic[key] = tmp
-    #print(res_dic)
-
-    with open("analysis/" + app_name + ".res.result", "w", encoding='UTF-8') as json_file:
-        json.dump(res_dic, json_file)
-
-def res_analysis():
-    msg = '\n' + "*" * 10 + " 1. Resource 에 대한 분석 " + "*" * 10
+import os
+from utils.parsing import finder
+import json
+from utils.out import u_print,analysis,bold_print
+from core.dy_tracing import ltracing
+def tracing_analysis():
+    msg='\n\n'+"*"*10+" 3. System call에 대한 연계 분석 "+"*"*10
     bold_print(msg)
-
-    lib_dir = "analysis/"
+    lib_dir='analysis'
     file_list = os.listdir(lib_dir)
-
+    node_pool=[]
+    json_list=[]
     for f_name in file_list:
-        #usage_pool = {}
-        if finder(f_name, '.res.result'):
-            app=f_name.replace('.res.result','')
-            msg = 'Resource Usage of {0}'.format(app)
-            u_print(msg)
+        if finder(f_name, '.syscall.result'):
             with open(lib_dir + "/" + f_name) as json_file:
                 json_data = json.load(json_file)
-                #print(json_data)
-                for a in json_data:
-                    if a=='failcnt' or a=='pgpgin' or a=='pgpgout':
-                        msg = '{0} : {1}'.format(str(a), str(json_data[a]))
-                    else :
-                        msg='{0} : {1} KB'.format(str(a),str(json_data[a]))
-                    analysis(msg)
-
-
+                for node in json_data:
+                    if not str(node) in node_pool:
+                        node_pool.append(node)
+                json_list.append(f_name)
+        # msg = '동적 라이브러리 분석 결과\n'+'-'*100+'\n'
+    app_list=[]
+    for app in json_list:
+        app_list.append(app.replace(".syscall.result",''))
+    msg = "{0} 이 호출한 syscall 갯수는 총 {1} 개입니다.".format(app_list, len(node_pool))  # 최종수정 다시해보기 100%라고 나옴 b.py이상한앤데..
