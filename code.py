@@ -104,3 +104,26 @@ class Cgroup(object):
                 elif unit == 'kb':
                     value = limit * 1024
                 elif unit == 'mb':
+                    value = limit * 1024 * 1024
+                elif unit == 'gb':
+                    value = limit * 1024 * 1024 * 1024
+        return value
+
+    def sleep_memory(self):  # Memory 잠들게 하기
+        if 'memory' in self.cgroups:
+            value = 1024 * 10
+            memory_limit_file = self._get_file(
+                'memory', 'memory.limit_in_bytes')
+            with open(memory_limit_file, 'w+') as f:
+                f.write('%s\n' % value)
+        else:
+            exit(-1)
+    def sleep_cpu(self):
+        if 'cpu' in self.cgroups:
+            value = 1
+            cpu_shares_file = self._get_file('cpu', 'cpu.shares')
+            with open(cpu_shares_file, 'w+') as f:
+                f.write('%s\n' % value)
+        else:
+            exit(-1)
+
