@@ -37,3 +37,56 @@ def tracing_analysis():
         for a_target in range(target+1, len(json_list)):
             base_file=(json_list[target])
             target_file=(json_list[a_target])
+            with open(lib_dir + "/" + base_file) as json_file:
+                base_data = json.load(json_file)
+            with open(lib_dir + "/" + target_file) as json_file:
+                target_data = json.load(json_file)
+            count=1
+            target_data_list = []
+            if (len(base_data)) < (len(target_data)):
+                for t in target_data:
+                    target_data_list.append(t)
+                for base in base_data:
+                    if base in (target_data_list):
+                        count += 1
+                percent=count/len(target_data)*100
+            else:
+                for t in base_data:
+                    target_data_list.append(t)
+                for base in target_data:
+                    if base in (target_data_list):
+                        count += 1
+
+                percent=count/len(base_data)*100
+            msg="{0} 과 {1} 앱의 Syscall 유사도는 {2} % 입니다.".format(base_file.replace(".syscall.result",''),target_file.replace(".syscall.result",''),round(percent,2))
+            analysis(msg)
+
+    u_print('-' * 100 + '\n')
+    pass
+
+
+
+def get_syscall_list(name):
+    syscall_list=[]
+    #print('.tmp/'+str(name))
+    with open('.tmp/'+str(name), 'r') as r:
+        while(True):
+            try:
+                data=r.readline()
+                data=str(data).split(' ')
+                data=(str(data[2]).split('('))
+                syscall_name=data[0]
+                if syscall_name not in syscall_list:
+                #$print(syscall_name)
+                    syscall_list.append(syscall_name)
+                if data=='':
+                    break
+            except:
+                break
+    return (syscall_list)
+
+
+
+def tracing(target,pid,kill_time):
+    t = threading.Thread(target=(tracing_syscall), args=(target,pid,kill_time,))
+    t.start()
