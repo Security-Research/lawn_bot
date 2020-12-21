@@ -1,19 +1,20 @@
-from ctypes import *
-import time
-while(True):
+#! /usr/python3
+# -*- coding:utf-8 -*-
 
-    #load the shared object file
-    adder = CDLL('./testing_app/adder.so')
+import os,sys
+import logging
+from pwd import getpwnam
 
-    #Find sum of integers
-    res_int = adder.add_int(4,5)
-    msg="Sum of 4 and 5 = " + str(res_int)
-    print(msg)
+from utils.exception import CgroupsException,BASE_CGROUPS
 
-    #Find sum of floats
-    a = c_float(5.5)
-    b = c_float(4.1)
+logger = logging.getLogger(__name__)
 
-    add_float = adder.add_float
-    add_float.restype = c_float
-    msg= "Sum of 5.5 and 4.1 = ", str(add_float(a, b))
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logstream = logging.StreamHandler()
+logstream.setFormatter(formatter)
+logger.addHandler(logstream)
+logger.setLevel(logging.INFO)
+def log(type,msg):
+    if type=='INFO':
+        logger.info('{0}'.format(msg))
