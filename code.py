@@ -1,20 +1,16 @@
-#! /usr/python3
-# -*- coding:utf-8 -*-
+import os
+import subprocess
+support_interpreter='/usr/bin/python3'
+import threading
+import time
+from utils.out import info,warning,critical
+from core.lib_analysis import get_lib
+from core.tracing import tracing
+from core.dy_tracing import ltracing
+kill_time=10
 
-import os,sys
-import logging
-from pwd import getpwnam
-
-from utils.exception import CgroupsException,BASE_CGROUPS
-
-logger = logging.getLogger(__name__)
-
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logstream = logging.StreamHandler()
-logstream.setFormatter(formatter)
-logger.addHandler(logstream)
-logger.setLevel(logging.INFO)
-def log(type,msg):
-    if type=='INFO':
-        logger.info('{0}'.format(msg))
+def poll(target,pg):
+    #warning("Analysis",""+str(target))
+    while pg.poll() == None:
+        out = pg.stdout.readline()
+        time.sleep(kill_time)
