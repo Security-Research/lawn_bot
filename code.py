@@ -1,54 +1,39 @@
-from utils.parsing import get_app_list
-from core.run import run_app
-from utils.out import info,warning,critical
-from core.cgroups import Cgroup
-from utils.out import warning,u_print,critical,analysis,bold_print
-import os
-from utils.parsing import finder
-import time
-import json
+import argparse
+
+from core.report import report
+from core.manager import reset
+from core.execute import execute
 
 
-def resource_usage(app_name,pid):
+def isint(a):
 
-    cg=Cgroup(app_name)
-    cg.add_process(app_name,pid)
-    usage_list={'cache':[], 'rss':[],'usage':[], 'failcnt':[],'pgpgin':[], 'pgpgout':[]}
+    if int(a):
+        return 1
+    else:
+        return 0
 
-    cnt =0
-    for i in range(10):
-        usage_list['cache'].append(cg.get_memory_stat(app_name,'cache')) #byte
-        usage_list['rss'].append(cg.get_memory_stat(app_name,'rss')) #byte
-        usage_list['usage'].append(cg.get_memory_info(app_name,'usage_in_bytes')) #byte
-        usage_list['failcnt'].append(cg.get_memory_info(app_name, 'usage_in_bytes')) #cnt
-        usage_list['pgpgin'].append(cg.get_memory_stat(app_name,'pgpgin')) #cnt
-        usage_list['pgpgout'].append(cg.get_memory_stat(app_name,'pgpgout')) #cnt
-        cnt += 1
-        time.sleep(1)
-    usage_list['max_usage']=cg.get_memory_info(app_name,'max_usage_in_bytes')
+def get_arguments():
+    return [
+    ("--start", "Start a Thermometer deamon"),
+    ("--reporter", "Get a reporter"),
+    ("--reset","Reset a Thermometer deamon")
+    ]
 
-    #print(usage_list)
 
-    with open(".tmp/" + app_name + ".res.json", "w", encoding='UTF-8') as json_file:
-        json.dump(usage_list, json_file)
+def add_arguments():
+    parser=argparse.ArgumentParser(description="Thermometer by syscore")
+    for argument in get_arguments():
+        parser.add_argument(argument[0], help=argument[1], action="store_true")
+    parser.add_argument("-s", action='store', dest='sec', help='running second',default=10)
 
-    #json
-    res_dic = {}
-    for key in usage_list.keys():
-        if key=='cache' or key=='rss' or key=='usage':
-            tmp=sum(usage_list[key])//cnt//1024
-        elif key=='max_usage':
-            tmp=usage_list[key]//1024
-        else:
-            tmp=sum(usage_list[key])//cnt
-        res_dic[key] = tmp
-    #print(res_dic)
+    return parser.parse_args()
 
-    with open("analysis/" + app_name + ".res.result", "w", encoding='UTF-8') as json_file:
-        json.dump(res_dic, json_file)
-
-def res_analysis():
-    msg = '\n' + "*" * 10 + " 1. Resource 에 대한 분석 " + "*" * 10
-    bold_print(msg)
-
-    lib_dir = "analysis/"
+def commands():
+    args = add_arguments()
+    sec=args.sec
+    if args.start:
+        if not isint(sec):
+            print("sec is int")
+        #print("start",sec)
+        execute(sec)
+        #start(sec)
