@@ -1,4 +1,3 @@
+import argparse
 
-import time
-
-for i in range(0,10000000):
+from core.report import report
