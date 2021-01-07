@@ -1,3 +1,3 @@
-import argparse
 
-from core.report import report
+import os
+def get_app_list():
