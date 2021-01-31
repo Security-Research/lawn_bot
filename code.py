@@ -1,26 +1,12 @@
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+import subprocess,threading,time
 
-def u_print(obj):
-    msg="{0}".format(obj)
-    print(bcolors.OKGREEN + msg + bcolors.ENDC)
+import os,signal
+from utils.parsing import finder
+import json
+from utils.out import bold_print,u_print,analysis
 
-def bold_print(obj):
-    msg="{0}".format(obj)
-    print(bcolors.BOLD + msg + bcolors.ENDC)
 
-def info(obj,sub):
-    msg="[Info] {0} : {1}".format(obj,sub)
-    print(bcolors.OKBLUE + msg + bcolors.ENDC)
-
-def warning(obj,sub):
-    msg="[Warning] {0} : {1}".format(obj,sub)
+def dy_tracing_analysis():
+    msg="\n\n"+"*"*10+" 4. Dynamic Lib 에 대한 연계 분석 "+"*"*10
+    bold_print(msg)
