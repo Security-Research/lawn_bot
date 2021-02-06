@@ -1,9 +1,22 @@
-#! /usr/bin/python3
-# -*- coding:utf-8 -*-
-BASE_CGROUPS = '/sys/fs/cgroup'
-HIDDEN_DIR='.data/'
+import os
+from utils.out import info,critical
 
-class CgroupsException(Exception):
-    if str(Exception).find("Exception")<0:
-        print(Exception)
 
+
+def createFolder(directory):
+    try:
+        if not os.path.exists(directory):
+
+            os.mkdir(directory)
+            info("Created directory",directory)
+    except OSError:
+        print('Error: Creating directory. ' + directory)
+
+def removeFolder(directory):
+    try:
+        if os.path.exists(directory):
+            os.rmdir(directory)
+            critical("Remove directory", directory)
+    except:
+        print('Error: Removing directory. ' + directory)
+def chmod():
