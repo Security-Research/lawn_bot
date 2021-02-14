@@ -105,5 +105,3 @@ def get_lib(app_name,pid):
     lib_name_list=[]
     #print(data[0])
     for i in range(1,len(data)-1):
-        info=(data[i].split(" "))
-        lib_name=info[-1]
