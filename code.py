@@ -98,10 +98,3 @@ def get_lib(app_name,pid):
     time.sleep(1)
     new_pid=int(pid)+2#bug ! +
     data=''
-    data=subprocess.check_output("lsof -w -p " + str(new_pid),shell=True)
-    #os.system("lsof -w -p " + str(new_pid))
-    data=str(data).split('\\n')
-    node_id_list=[]
-    lib_name_list=[]
-    #print(data[0])
-    for i in range(1,len(data)-1):
