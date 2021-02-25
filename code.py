@@ -1,33 +1,26 @@
-#! /usr/python3
-# -*- coding:utf-8 -*-
+import os
+from utils.out import info,critical
 
-import os,sys
-import logging
-from pwd import getpwnam
 
-from utils.exception import CgroupsException,BASE_CGROUPS
 
-logger = logging.getLogger(__name__)
-
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logstream = logging.StreamHandler()
-logstream.setFormatter(formatter)
-logger.addHandler(logstream)
-logger.setLevel(logging.INFO)
-def log(type,msg):
-    if type=='INFO':
-        logger.info('{0}'.format(msg))
-    elif type=='WARN':
-        logger.info('{0}'.format(msg))
-
-def get_user_info(user):
+def createFolder(directory):
     try:
-        user_system = getpwnam(user)
-    except KeyError:
-        raise CgroupsException("User %s doesn't exists" % user)
-    else:
-        uid = user_system.pw_uid
-        gid = user_system.pw_gid
-    return uid, gid
+        if not os.path.exists(directory):
 
+            os.mkdir(directory)
+            info("Created directory",directory)
+    except OSError:
+        print('Error: Creating directory. ' + directory)
+
+def removeFolder(directory):
+    try:
+        if os.path.exists(directory):
+            os.rmdir(directory)
+            critical("Remove directory", directory)
+    except:
+        print('Error: Removing directory. ' + directory)
+def chmod():
+    os.system('chmod 777 core/syscall')
+def init():
+    createFolder('.tmp')
+    createFolder('analysis')
