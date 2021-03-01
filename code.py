@@ -1,23 +1,34 @@
-import os
-from utils.out import info,critical
+import argparse
+
+from core.report import report
+from core.manager import reset
+from core.execute import execute
 
 
+def isint(a):
 
-def createFolder(directory):
-    try:
-        if not os.path.exists(directory):
+    if int(a):
+        return 1
+    else:
+        return 0
 
-            os.mkdir(directory)
-            info("Created directory",directory)
-    except OSError:
-        print('Error: Creating directory. ' + directory)
+def get_arguments():
+    return [
+    ("--start", "Start a Thermometer deamon"),
+    ("--reporter", "Get a reporter"),
+    ("--reset","Reset a Thermometer deamon")
+    ]
 
-def removeFolder(directory):
-    try:
-        if os.path.exists(directory):
-            os.rmdir(directory)
-            critical("Remove directory", directory)
-    except:
-        print('Error: Removing directory. ' + directory)
-def chmod():
-    os.system('chmod 777 core/syscall')
+
+def add_arguments():
+    parser=argparse.ArgumentParser(description="Thermometer by syscore")
+    for argument in get_arguments():
+        parser.add_argument(argument[0], help=argument[1], action="store_true")
+    parser.add_argument("-s", action='store', dest='sec', help='running second',default=10)
+
+    return parser.parse_args()
+
+def commands():
+    args = add_arguments()
+    sec=args.sec
+    if args.start:
