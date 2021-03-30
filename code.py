@@ -1,6 +1,27 @@
-from utils.parsing import get_app_list
-from core.run import run_app
-from utils.out import info,warning,critical,analysis
-from core.lib_analysis import lib_analysis,similarity
-from core.tracing import tracing
-#commands()
+import os
+from utils.out import info,critical
+
+
+
+def createFolder(directory):
+    try:
+        if not os.path.exists(directory):
+
+            os.mkdir(directory)
+            info("Created directory",directory)
+    except OSError:
+        print('Error: Creating directory. ' + directory)
+
+def removeFolder(directory):
+    try:
+        if os.path.exists(directory):
+            os.rmdir(directory)
+            critical("Remove directory", directory)
+    except:
+        print('Error: Removing directory. ' + directory)
+def chmod():
+    os.system('chmod 777 core/syscall')
+def init():
+    createFolder('.tmp')
+    createFolder('analysis')
+    chmod()
