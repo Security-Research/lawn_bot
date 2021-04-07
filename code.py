@@ -1,2 +1,6 @@
-from utils.parsing import get_app_list
-from core.run import run_app
+
+import os
+def get_app_list():
+    path_dir='./testing_app'
+    file_list = os.listdir(path_dir)
+    python_list=[]
