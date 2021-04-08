@@ -1,6 +1,9 @@
 
-import os
-def get_app_list():
-    path_dir='./testing_app'
-    file_list = os.listdir(path_dir)
-    python_list=[]
+import subprocess,threading,time
+
+import os,signal
+from utils.parsing import finder
+import json
+from utils.out import bold_print,u_print,analysis
+
+
