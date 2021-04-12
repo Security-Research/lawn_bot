@@ -1,15 +1,16 @@
+#! /usr/python3
+# -*- coding:utf-8 -*-
 
-import subprocess,threading,time
+import os,sys
+import logging
+from pwd import getpwnam
 
-import os,signal
-from utils.parsing import finder
-import json
-from utils.out import bold_print,u_print,analysis
+from utils.exception import CgroupsException,BASE_CGROUPS
 
+logger = logging.getLogger(__name__)
 
-def dy_tracing_analysis():
-    msg="\n\n"+"*"*10+" 4. Dynamic Lib 에 대한 연계 분석 "+"*"*10
-    bold_print(msg)
-    lib_dir='analysis'
-    file_list = os.listdir(lib_dir)
-    node_pool=[]
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logstream = logging.StreamHandler()
+logstream.setFormatter(formatter)
+logger.addHandler(logstream)
