@@ -1,3 +1,10 @@
-from utils.parsing import get_app_list
-from core.run import run_app
-from utils.out import info,warning,critical,analysis
+import argparse
+
+from core.report import report
+from core.manager import reset
+from core.execute import execute
+
+
+def isint(a):
+
+    if int(a):
