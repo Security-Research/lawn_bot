@@ -1,27 +1,17 @@
-from utils.parsing import get_app_list
-from core.run import run_app
-from utils.out import info,warning,critical,analysis
-from core.lib_analysis import lib_analysis,similarity
-from core.tracing import tracing
-#commands()
-import os,subprocess,signal
-import sys
-import json,time
-from core.tracing import tracing_analysis
-from core.dy_tracing import dy_tracing_analysis
-
-from core.manager import init
-from core.resource import resource_usage, res_analysis
+import os
+import subprocess
+support_interpreter='/usr/bin/python3'
 import threading
-from tqdm import trange
+import time
+from utils.out import info,warning,critical
+from core.lib_analysis import get_lib
+from core.tracing import tracing
+from core.dy_tracing import ltracing
+kill_time=10
 
-def prog(times):
-    analysis('Estimated time :'+str(times*0.9) +'s')
-    progress(times)
-    #tv = threading.Thread(target=(progress), args=(times,))
-    #tv.start()
-
-def progress(times):
-    for i in trange(times*90):
-        time.sleep(0.01)
-
+def poll(target,pg):
+    #warning("Analysis",""+str(target))
+    while pg.poll() == None:
+        out = pg.stdout.readline()
+        time.sleep(kill_time)
+        #critical("kill",pg.pid)
