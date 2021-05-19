@@ -1,16 +1,23 @@
+import json,time
 import os
-from utils.out import info,critical
 
+import subprocess
 
+import os
+import json,time
 
-def createFolder(directory):
-    try:
-        if not os.path.exists(directory):
+lib_dir = ".tmp"
+#file_list = os.listdir(lib_dir)
 
-            os.mkdir(directory)
-            info("Created directory",directory)
-    except OSError:
-        print('Error: Creating directory. ' + directory)
+import os
+import json,time
+from utils.out import warning,u_print,critical,analysis,bold_print
+from utils.parsing import finder
 
-def removeFolder(directory):
-    try:
+def similarity():
+    msg = '\n\n'+"*" * 10 + " 2. LoadFile 에 대한 연계 분석 " + "*" * 10
+    bold_print(msg)
+
+    lib_dir = ".tmp"
+    file_list = os.listdir(lib_dir)
+    node_pool=[]
