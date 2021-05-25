@@ -1,15 +1,7 @@
-import os
-import subprocess
-support_interpreter='/usr/bin/python3'
-import threading
-import time
+from utils.parsing import get_app_list
+from core.run import run_app
 from utils.out import info,warning,critical
-from core.lib_analysis import get_lib
-from core.tracing import tracing
-from core.dy_tracing import ltracing
-kill_time=10
-
-def poll(target,pg):
-    #warning("Analysis",""+str(target))
-    while pg.poll() == None:
-        out = pg.stdout.readline()
+from core.cgroups import Cgroup
+from utils.out import warning,u_print,critical,analysis,bold_print
+import os
+from utils.parsing import finder
