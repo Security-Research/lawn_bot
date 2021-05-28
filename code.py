@@ -1,4 +1,3 @@
 
-import os
-def get_app_list():
-    path_dir='./testing_app'
+import time
+for i in range(0,10000000):
