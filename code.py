@@ -1,24 +1,28 @@
+import json,time
+import os
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+import subprocess
 
-def u_print(obj):
-    msg="{0}".format(obj)
-    print(bcolors.OKGREEN + msg + bcolors.ENDC)
+import os
+import json,time
 
-def bold_print(obj):
-    msg="{0}".format(obj)
-    print(bcolors.BOLD + msg + bcolors.ENDC)
+lib_dir = ".tmp"
+#file_list = os.listdir(lib_dir)
 
-def info(obj,sub):
-    msg="[Info] {0} : {1}".format(obj,sub)
-    print(bcolors.OKBLUE + msg + bcolors.ENDC)
+import os
+import json,time
+from utils.out import warning,u_print,critical,analysis,bold_print
+from utils.parsing import finder
 
+def similarity():
+    msg = '\n\n'+"*" * 10 + " 2. LoadFile 에 대한 연계 분석 " + "*" * 10
+    bold_print(msg)
+
+    lib_dir = ".tmp"
+    file_list = os.listdir(lib_dir)
+    node_pool=[]
+    json_list=[]
+    for f_name in file_list:
+        if finder(f_name, '.lib.json'):
+            with open(lib_dir + "/" + f_name) as json_file:
+                json_data = json.load(json_file)
