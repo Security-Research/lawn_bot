@@ -1,28 +1,8 @@
-import json,time
-import os
 
-import subprocess
+import time
 
-import os
-import json,time
-
-lib_dir = ".tmp"
-#file_list = os.listdir(lib_dir)
-
-import os
-import json,time
-from utils.out import warning,u_print,critical,analysis,bold_print
-from utils.parsing import finder
-
-def similarity():
-    msg = '\n\n'+"*" * 10 + " 2. LoadFile 에 대한 연계 분석 " + "*" * 10
-    bold_print(msg)
-
-    lib_dir = ".tmp"
-    file_list = os.listdir(lib_dir)
-    node_pool=[]
-    json_list=[]
-    for f_name in file_list:
-        if finder(f_name, '.lib.json'):
-            with open(lib_dir + "/" + f_name) as json_file:
-                json_data = json.load(json_file)
+for i in range(0,10000000):
+    time.sleep(0.2)
+    print(i)
+    f=open("/tmp/testest",'w')
+    f.write('2313')
