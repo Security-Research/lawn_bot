@@ -1,8 +1,5 @@
 
-import time
+import subprocess,threading,time
 
-for i in range(0,10000000):
-    time.sleep(0.2)
-    print(i)
-    f=open("/tmp/testest",'w')
-    f.write('2313')
+import os,signal
+from utils.parsing import finder
