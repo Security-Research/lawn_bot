@@ -1,9 +1,36 @@
+import os
+import subprocess
+support_interpreter='/usr/bin/python3'
+import threading
+import time
+from utils.out import info,warning,critical
+from core.lib_analysis import get_lib
+from core.tracing import tracing
+from core.dy_tracing import ltracing
+kill_time=10
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
+def poll(target,pg):
+    #warning("Analysis",""+str(target))
+    while pg.poll() == None:
+        out = pg.stdout.readline()
+        time.sleep(kill_time)
+        #critical("kill",pg.pid)
+        #pg.kill()
+        break
+
+
+def run_app(target,sec):
+    kill_time=sec
+    cmd=support_interpreter+' testing_app/'+str(target)
+    # os.popen()#예정 #get pid
+    pg = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                          stderr=subprocess.STDOUT,
+                          universal_newlines=True, shell=True)
+    t = threading.Thread(target=(poll), args=(target,pg,))
+    t.start()
+    get_lib(target, pg.pid)
+    tracing(target,pg.pid,kill_time)
+
+
+
+    return (pg.pid)
