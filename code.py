@@ -1,36 +1,19 @@
-import os
-import subprocess
-support_interpreter='/usr/bin/python3'
-import threading
-import time
-from utils.out import info,warning,critical
-from core.lib_analysis import get_lib
+from utils.parsing import get_app_list
+from core.run import run_app
+from utils.out import info,warning,critical,analysis
+from core.lib_analysis import lib_analysis,similarity
 from core.tracing import tracing
-from core.dy_tracing import ltracing
-kill_time=10
+#commands()
+import os,subprocess,signal
+import sys
+import json,time
+from core.tracing import tracing_analysis
+from core.dy_tracing import dy_tracing_analysis
 
-def poll(target,pg):
-    #warning("Analysis",""+str(target))
-    while pg.poll() == None:
-        out = pg.stdout.readline()
-        time.sleep(kill_time)
-        #critical("kill",pg.pid)
-        #pg.kill()
-        break
+from core.manager import init
+from core.resource import resource_usage, res_analysis
+import threading
+from tqdm import trange
 
-
-def run_app(target,sec):
-    kill_time=sec
-    cmd=support_interpreter+' testing_app/'+str(target)
-    # os.popen()#예정 #get pid
-    pg = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                          stderr=subprocess.STDOUT,
-                          universal_newlines=True, shell=True)
-    t = threading.Thread(target=(poll), args=(target,pg,))
-    t.start()
-    get_lib(target, pg.pid)
-    tracing(target,pg.pid,kill_time)
-
-
-
-    return (pg.pid)
+def prog(times):
+    analysis('Estimated time :'+str(times*0.9) +'s')
