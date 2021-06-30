@@ -1,29 +1,6 @@
-import threading
-import os
-import time
-import json
 
-
-import os
-from utils.parsing import finder
-import json
-from utils.out import u_print,analysis,bold_print
-from core.dy_tracing import ltracing
-def tracing_analysis():
-    msg='\n\n'+"*"*10+" 3. System call에 대한 연계 분석 "+"*"*10
-    bold_print(msg)
-    lib_dir='analysis'
-    file_list = os.listdir(lib_dir)
-    node_pool=[]
-    json_list=[]
-    for f_name in file_list:
-        if finder(f_name, '.syscall.result'):
-            with open(lib_dir + "/" + f_name) as json_file:
-                json_data = json.load(json_file)
-                for node in json_data:
-                    if not str(node) in node_pool:
-                        node_pool.append(node)
-                json_list.append(f_name)
-        # msg = '동적 라이브러리 분석 결과\n'+'-'*100+'\n'
-    app_list=[]
-    for app in json_list:
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
