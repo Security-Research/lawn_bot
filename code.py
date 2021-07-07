@@ -1,79 +1,109 @@
-import subprocess, getpass, os
-from pwd import getpwnam
-from utils.exception import CgroupsException,BASE_CGROUPS
-from core.user import create_cgroups, get_user_info
-import logging
+import json,time
+import os
 
-CONTROL = [
-    'cpu',
-    'memory',
-]
+import subprocess
 
-logger = logging.getLogger(__name__)
-CPU_DEFAULT = 1024
-MEMORY_DEFAULT = 1
+import os
+import json,time
+
+lib_dir = ".tmp"
+#file_list = os.listdir(lib_dir)
+
+import os
+import json,time
+from utils.out import warning,u_print,critical,analysis,bold_print
+from utils.parsing import finder
+
+def similarity():
+    msg = '\n\n'+"*" * 10 + " 2. LoadFile 에 대한 연계 분석 " + "*" * 10
+    bold_print(msg)
+
+    lib_dir = ".tmp"
+    file_list = os.listdir(lib_dir)
+    node_pool=[]
+    json_list=[]
+    for f_name in file_list:
+        if finder(f_name, '.lib.json'):
+            with open(lib_dir + "/" + f_name) as json_file:
+                json_data = json.load(json_file)
+            for node in json_data:
+                if not str(node) in node_pool:
+                    node_pool.append(node)
+            json_list.append(f_name)
+    #msg = '동적 라이브러리 분석 결과\n'+'-'*100+'\n'
+    app_list=[]
+    for app in json_list:
+        app_list.append(app.replace(".lib.json",''))
+    msg="{0} 이 Load File 갯수는 총 {1} 개입니다.".format(app_list,len(node_pool)) #최종수정 다시해보기 100%라고 나옴 b.py이상한앤데..
+    u_print(msg)
+    msg= '-'*100
+    u_print(msg)
+    #u_print('Load File:' + str(node_pool.))
+
+    for target in range(0,len(json_list)-1):
+
+        for a_target in range(target+1, len(json_list)):
+            base_file=(json_list[target])
+            target_file=(json_list[a_target])
+            with open(lib_dir + "/" + base_file) as json_file:
+                base_data = json.load(json_file)
+            with open(lib_dir + "/" + target_file) as json_file:
+                target_data = json.load(json_file)
+            count=1
+            target_data_list = []
+            if (len(base_data)) < (len(target_data)):
+                for t in target_data:
+                    target_data_list.append(t)
+                for base in base_data:
+                    if base in (target_data_list):
+                        count += 1
+                percent=count/len(target_data)*100
+            else:
+                for t in base_data:
+                    target_data_list.append(t)
+                for base in target_data:
+                    if base in (target_data_list):
+                        count += 1
+
+                percent=count/len(base_data)*100
+            msg="{0} 과 {1} 앱의 Load file 유사도는 {2} % 입니다.".format(base_file.replace(".lib.json",''),target_file.replace(".lib.json",''),round(percent,2))
+            analysis(msg)
+
+    u_print('-' * 100 + '\n')
+
+def lib_analysis():
+    lib_dir=".tmp"
+    file_list = os.listdir(lib_dir)
+    #print(file_list)
+    msg = "분석 된 App의 갯수는 " + str(len(file_list)) + "개 입니다."
+    #print(msg)
+    for f_name in file_list:
+        #print(f_name)
+        #print(finder(f_name,'.json'))
+        if finder(f_name,'.json'):
+            strFormat = '%-20s%-10s%-40s\n'
+            strOut = strFormat % ('Timestamp', 'Node', 'Name')
+            strOut += "-" * 100 + "\n"
+
+            with open(lib_dir + "/" + f_name) as json_file:
+                json_data = json.load(json_file)
+            for node in json_data:
+                strOut += strFormat % (str(int(time.time())), node, json_data[node])
+            with open("analysis/" + str(f_name.replace(".lib.json", '')) + ".lib.result", "w", encoding='UTF-8') as f:
+                #print(strOut) //출력용
+                f.write(strOut)
 
 
-class Cgroup(object):
-    def __init__(self, cgroups_name, target='all', user='syscore'):
-        self.cgroups_name = cgroups_name
-        self.user = user
-        self.target = ''
-        self.u_cgroups = {}
-        self.target = [c for c in target if c in CONTROL]
-        system = os.listdir(BASE_CGROUPS)
-
-        for h in self.target:  #
-            if h not in system:
-                exit(-1)
-            user_cgroup = os.path.join(BASE_CGROUPS, h, self.user)
-            self.u_cgroups[h] = user_cgroup
-        create_cgroups(cgroups_name, script=False)
-        self.cgroups = {}
-
-        for h, user_cgroup in self.u_cgroups.items():
-            cgroup = os.path.join(user_cgroup, self.cgroups_name)
-            if not os.path.exists(cgroup):
-                os.mkdir(cgroup)
-            self.cgroups[h] = cgroup
-
-    def _get_file(self, hierarchy, file_name):
-        return os.path.join(self.cgroups[hierarchy], file_name)
-
-    def set_cpu_limit(self, limit=None):
-        if 'cpu' in self.cgroups:
-            value = self._format_cpu_value(limit)
-            cpu_shares_file = self._get_file('cpu', 'cpu.shares')
-            with open(cpu_shares_file, 'w+') as f:
-                f.write('%s\n' % value)
-        else:
-            exit(-1)
-
-    #memory
-    def get_memory_info(self,app_name,info):
-        usage = 0
-        with open('/sys/fs/cgroup/memory/' + str(app_name) + '/memory.'+info, 'r+') as f:
-            data = f.readline()
-            usage = int(data)
-        return usage
-
-    def get_memory_stat(self,app_name,info):
-        f=open('/sys/fs/cgroup/memory/' + str(app_name) + '/memory.stat', 'r+')
-        lines=f.readlines()
-        for line in lines:
-            line=line.strip('\n')
-            data=line.split(' ')
-            if info==data[0] :
-                return int(data[1])
-
-
-    # CPU
-    def _format_cpu_value(self, limit=None):
-        if limit is None:
-            value = CPU_DEFAULT
-        else:
-            limit = limit / 100
-            value = int(round(CPU_DEFAULT * limit))
-        return value
-
-    def set_memory_limit(self, limit=None, unit='megabytes'):
+def get_lib(app_name,pid):
+    time.sleep(1)
+    new_pid=int(pid)+2#bug ! +
+    data=''
+    data=subprocess.check_output("lsof -w -p " + str(new_pid),shell=True)
+    #os.system("lsof -w -p " + str(new_pid))
+    data=str(data).split('\\n')
+    node_id_list=[]
+    lib_name_list=[]
+    #print(data[0])
+    for i in range(1,len(data)-1):
+        info=(data[i].split(" "))
+        lib_name=info[-1]
