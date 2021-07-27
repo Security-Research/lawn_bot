@@ -1,8 +1,23 @@
+from utils.parsing import get_app_list
+from core.run import run_app
+from utils.out import info,warning,critical,analysis
+from core.lib_analysis import lib_analysis,similarity
+from core.tracing import tracing
+#commands()
+import os,subprocess,signal
+import sys
+import json,time
+from core.tracing import tracing_analysis
+from core.dy_tracing import dy_tracing_analysis
 
-import time
+from core.manager import init
+from core.resource import resource_usage, res_analysis
+import threading
+from tqdm import trange
 
-for i in range(0,10000000):
-    time.sleep(0.2)
-    print(i)
-    f=open("/tmp/testest",'w')
-    f.write('2313')
+def prog(times):
+    analysis('Estimated time :'+str(times*0.9) +'s')
+    progress(times)
+    #tv = threading.Thread(target=(progress), args=(times,))
+    #tv.start()
+
