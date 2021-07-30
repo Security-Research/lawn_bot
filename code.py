@@ -24,3 +24,6 @@ def info(obj,sub):
 
 def warning(obj,sub):
     msg="[Warning] {0} : {1}".format(obj,sub)
+    print(bcolors.WARNING + msg + bcolors.ENDC)
+
+
