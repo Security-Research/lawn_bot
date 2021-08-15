@@ -1,8 +1,4 @@
 
-import subprocess,threading,time
+import time
 
-import os,signal
-from utils.parsing import finder
-import json
-from utils.out import bold_print,u_print,analysis
-
+for i in range(0,10000000):
