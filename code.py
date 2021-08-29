@@ -1,47 +1,39 @@
-import json,time
+import threading
 import os
+import time
+import json
 
-import subprocess
-
-import os
-import json,time
-
-lib_dir = ".tmp"
-#file_list = os.listdir(lib_dir)
 
 import os
-import json,time
-from utils.out import warning,u_print,critical,analysis,bold_print
 from utils.parsing import finder
-
-def similarity():
-    msg = '\n\n'+"*" * 10 + " 2. LoadFile 에 대한 연계 분석 " + "*" * 10
+import json
+from utils.out import u_print,analysis,bold_print
+from core.dy_tracing import ltracing
+def tracing_analysis():
+    msg='\n\n'+"*"*10+" 3. System call에 대한 연계 분석 "+"*"*10
     bold_print(msg)
-
-    lib_dir = ".tmp"
+    lib_dir='analysis'
     file_list = os.listdir(lib_dir)
     node_pool=[]
     json_list=[]
     for f_name in file_list:
-        if finder(f_name, '.lib.json'):
+        if finder(f_name, '.syscall.result'):
             with open(lib_dir + "/" + f_name) as json_file:
                 json_data = json.load(json_file)
-            for node in json_data:
-                if not str(node) in node_pool:
-                    node_pool.append(node)
-            json_list.append(f_name)
-    #msg = '동적 라이브러리 분석 결과\n'+'-'*100+'\n'
+                for node in json_data:
+                    if not str(node) in node_pool:
+                        node_pool.append(node)
+                json_list.append(f_name)
+        # msg = '동적 라이브러리 분석 결과\n'+'-'*100+'\n'
     app_list=[]
     for app in json_list:
-        app_list.append(app.replace(".lib.json",''))
-    msg="{0} 이 Load File 갯수는 총 {1} 개입니다.".format(app_list,len(node_pool)) #최종수정 다시해보기 100%라고 나옴 b.py이상한앤데..
+        app_list.append(app.replace(".syscall.result",''))
+    msg = "{0} 이 호출한 syscall 갯수는 총 {1} 개입니다.".format(app_list, len(node_pool))  # 최종수정 다시해보기 100%라고 나옴 b.py이상한앤데..
     u_print(msg)
-    msg= '-'*100
+    msg = '-' * 100
     u_print(msg)
-    #u_print('Load File:' + str(node_pool.))
-
+    u_print('syscall list:'+str(node_pool))
     for target in range(0,len(json_list)-1):
-
         for a_target in range(target+1, len(json_list)):
             base_file=(json_list[target])
             target_file=(json_list[a_target])
@@ -66,35 +58,12 @@ def similarity():
                         count += 1
 
                 percent=count/len(base_data)*100
-            msg="{0} 과 {1} 앱의 Load file 유사도는 {2} % 입니다.".format(base_file.replace(".lib.json",''),target_file.replace(".lib.json",''),round(percent,2))
+            msg="{0} 과 {1} 앱의 Syscall 유사도는 {2} % 입니다.".format(base_file.replace(".syscall.result",''),target_file.replace(".syscall.result",''),round(percent,2))
             analysis(msg)
 
     u_print('-' * 100 + '\n')
-
-def lib_analysis():
-    lib_dir=".tmp"
-    file_list = os.listdir(lib_dir)
-    #print(file_list)
-    msg = "분석 된 App의 갯수는 " + str(len(file_list)) + "개 입니다."
-    #print(msg)
-    for f_name in file_list:
-        #print(f_name)
-        #print(finder(f_name,'.json'))
-        if finder(f_name,'.json'):
-            strFormat = '%-20s%-10s%-40s\n'
-            strOut = strFormat % ('Timestamp', 'Node', 'Name')
-            strOut += "-" * 100 + "\n"
-
-            with open(lib_dir + "/" + f_name) as json_file:
-                json_data = json.load(json_file)
-            for node in json_data:
-                strOut += strFormat % (str(int(time.time())), node, json_data[node])
-            with open("analysis/" + str(f_name.replace(".lib.json", '')) + ".lib.result", "w", encoding='UTF-8') as f:
-                #print(strOut) //출력용
-                f.write(strOut)
+    pass
 
 
-def get_lib(app_name,pid):
-    time.sleep(1)
-    new_pid=int(pid)+2#bug ! +
-    data=''
+
+def get_syscall_list(name):
