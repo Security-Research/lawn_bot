@@ -1,60 +1,110 @@
-from utils.parsing import get_app_list
-from core.run import run_app
-from utils.out import info,warning,critical
-from core.cgroups import Cgroup
-from utils.out import warning,u_print,critical,analysis,bold_print
-import os
-from utils.parsing import finder
-import time
-import json
+import subprocess, getpass, os
+from pwd import getpwnam
+from utils.exception import CgroupsException,BASE_CGROUPS
+from core.user import create_cgroups, get_user_info
+import logging
+
+CONTROL = [
+    'cpu',
+    'memory',
+]
+
+logger = logging.getLogger(__name__)
+CPU_DEFAULT = 1024
+MEMORY_DEFAULT = 1
 
 
-def resource_usage(app_name,pid):
+class Cgroup(object):
+    def __init__(self, cgroups_name, target='all', user='syscore'):
+        self.cgroups_name = cgroups_name
+        self.user = user
+        self.target = ''
+        self.u_cgroups = {}
+        self.target = [c for c in target if c in CONTROL]
+        system = os.listdir(BASE_CGROUPS)
 
-    cg=Cgroup(app_name)
-    cg.add_process(app_name,pid)
-    usage_list={'cache':[], 'rss':[],'usage':[], 'failcnt':[],'pgpgin':[], 'pgpgout':[]}
+        for h in self.target:  #
+            if h not in system:
+                exit(-1)
+            user_cgroup = os.path.join(BASE_CGROUPS, h, self.user)
+            self.u_cgroups[h] = user_cgroup
+        create_cgroups(cgroups_name, script=False)
+        self.cgroups = {}
 
-    cnt =0
-    for i in range(10):
-        usage_list['cache'].append(cg.get_memory_stat(app_name,'cache')) #byte
-        usage_list['rss'].append(cg.get_memory_stat(app_name,'rss')) #byte
-        usage_list['usage'].append(cg.get_memory_info(app_name,'usage_in_bytes')) #byte
-        usage_list['failcnt'].append(cg.get_memory_info(app_name, 'usage_in_bytes')) #cnt
-        usage_list['pgpgin'].append(cg.get_memory_stat(app_name,'pgpgin')) #cnt
-        usage_list['pgpgout'].append(cg.get_memory_stat(app_name,'pgpgout')) #cnt
-        cnt += 1
-        time.sleep(1)
-    usage_list['max_usage']=cg.get_memory_info(app_name,'max_usage_in_bytes')
+        for h, user_cgroup in self.u_cgroups.items():
+            cgroup = os.path.join(user_cgroup, self.cgroups_name)
+            if not os.path.exists(cgroup):
+                os.mkdir(cgroup)
+            self.cgroups[h] = cgroup
 
-    #print(usage_list)
+    def _get_file(self, hierarchy, file_name):
+        return os.path.join(self.cgroups[hierarchy], file_name)
 
-    with open(".tmp/" + app_name + ".res.json", "w", encoding='UTF-8') as json_file:
-        json.dump(usage_list, json_file)
-
-    #json
-    res_dic = {}
-    for key in usage_list.keys():
-        if key=='cache' or key=='rss' or key=='usage':
-            tmp=sum(usage_list[key])//cnt//1024
-        elif key=='max_usage':
-            tmp=usage_list[key]//1024
+    def set_cpu_limit(self, limit=None):
+        if 'cpu' in self.cgroups:
+            value = self._format_cpu_value(limit)
+            cpu_shares_file = self._get_file('cpu', 'cpu.shares')
+            with open(cpu_shares_file, 'w+') as f:
+                f.write('%s\n' % value)
         else:
-            tmp=sum(usage_list[key])//cnt
-        res_dic[key] = tmp
-    #print(res_dic)
+            exit(-1)
 
-    with open("analysis/" + app_name + ".res.result", "w", encoding='UTF-8') as json_file:
-        json.dump(res_dic, json_file)
+    #memory
+    def get_memory_info(self,app_name,info):
+        usage = 0
+        with open('/sys/fs/cgroup/memory/' + str(app_name) + '/memory.'+info, 'r+') as f:
+            data = f.readline()
+            usage = int(data)
+        return usage
 
-def res_analysis():
-    msg = '\n' + "*" * 10 + " 1. Resource 에 대한 분석 " + "*" * 10
-    bold_print(msg)
+    def get_memory_stat(self,app_name,info):
+        f=open('/sys/fs/cgroup/memory/' + str(app_name) + '/memory.stat', 'r+')
+        lines=f.readlines()
+        for line in lines:
+            line=line.strip('\n')
+            data=line.split(' ')
+            if info==data[0] :
+                return int(data[1])
 
-    lib_dir = "analysis/"
-    file_list = os.listdir(lib_dir)
 
-    for f_name in file_list:
-        #usage_pool = {}
-        if finder(f_name, '.res.result'):
-            app=f_name.replace('.res.result','')
+    # CPU
+    def _format_cpu_value(self, limit=None):
+        if limit is None:
+            value = CPU_DEFAULT
+        else:
+            limit = limit / 100
+            value = int(round(CPU_DEFAULT * limit))
+        return value
+
+    def set_memory_limit(self, limit=None, unit='megabytes'):
+        if 'memory' in self.cgroups:
+            value = self._format_memory_value(unit, limit)
+            memory_limit_file = self._get_file(
+                'memory', 'memory.limit_in_bytes')
+
+            with open(memory_limit_file, 'w+') as f:
+                f.write('%s\n' % value)
+        else:
+            exit(-1)
+
+    def _format_memory_value(self, unit, limit=None):
+        units = ('b', 'kb', 'mb', 'gb')
+        if unit not in units:
+            exit(-1)
+        if limit is None:
+            value = MEMORY_DEFAULT
+        else:
+            try:
+                limit = int(limit)
+            except ValueError:
+                exit(-1)
+            else:
+                if unit == 'b':
+                    value = limit
+                elif unit == 'kb':
+                    value = limit * 1024
+                elif unit == 'mb':
+                    value = limit * 1024 * 1024
+                elif unit == 'gb':
+                    value = limit * 1024 * 1024 * 1024
+        return value
