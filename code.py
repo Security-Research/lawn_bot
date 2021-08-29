@@ -1,11 +1,7 @@
+from ctypes import *
+import time
+while(True):
 
-import os
-def get_app_list():
-    path_dir='./testing_app'
-    file_list = os.listdir(path_dir)
-    python_list=[]
-    for file_name in file_list:
-        if finder(file_name,'.py') and not finder(file_name,'__init__'):
-            python_list.append(file_name)
-    return (python_list)
+    #load the shared object file
+    adder = CDLL('./testing_app/adder.so')
 
