@@ -55,7 +55,6 @@ def start(before_day):
     day=before_day
     get_time=int(time.time())
     now=get_time-(24*60*60*day)
-    now_date=datetime.datetime.fromtimestamp(now)
     for i in range(0,day):
         now = now+(24*60*60)
         now_date = datetime.datetime.fromtimestamp(now)
