@@ -1,6 +1,13 @@
-from utils.parsing import get_app_list
-from core.run import run_app
-from utils.out import info,warning,critical,analysis
-from core.lib_analysis import lib_analysis,similarity
-from core.tracing import tracing
-#commands()
+
+import os
+def get_app_list():
+    path_dir='./testing_app'
+    file_list = os.listdir(path_dir)
+    python_list=[]
+    for file_name in file_list:
+        if finder(file_name,'.py') and not finder(file_name,'__init__'):
+            python_list.append(file_name)
+    return (python_list)
+
+def finder(target,ob):
+    if str(target).find(str(ob)) >= 0:
