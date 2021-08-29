@@ -7,7 +7,6 @@ def commit(msg):
     exe(msg)
 def push():
     msg='git push'
-
     exe(msg)
 
 
