@@ -1,27 +1,31 @@
-import os
-from utils.parsing import finder
-from utils.out import bold_print,u_print,critical
-import json
-def read_analysis(obj,app_name):
-    lib_dir='analysis'
-    data=''
-    data += '-' * 100 + '\n'
-    if obj == 'res':
-        with open('.tmp' + "/" + app_name + '.res.json') as json_file:
-            json_data = json.load(json_file)
-        for v in json_data:
-            name = v
-            msg="{0} - {1}\n".format(name,json_data[name])
-            data+=msg
-    if obj=='file':
-        with open(lib_dir + "/" + app_name+'.lib.result') as json_file:
-            data=json_file.read(1000200000)
-    if obj=='system':
-        with open('.tmp' + "/" + app_name+'.syscall') as json_file:
-            data=json_file.read(1000200000)
-    if obj == 'dy':
-        with open('.tmp' + "/" + app_name + '.ltrace') as json_file:
-            data = json_file.read(1000200000)
+#! /usr/python3
+# -*- coding:utf-8 -*-
 
-    if obj=='all':
-        data += "*" * 10 + " 1.Resource" + "*" * 10+'\n'
+import os,sys
+import logging
+from pwd import getpwnam
+
+from utils.exception import CgroupsException,BASE_CGROUPS
+
+logger = logging.getLogger(__name__)
+
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logstream = logging.StreamHandler()
+logstream.setFormatter(formatter)
+logger.addHandler(logstream)
+logger.setLevel(logging.INFO)
+def log(type,msg):
+    if type=='INFO':
+        logger.info('{0}'.format(msg))
+    elif type=='WARN':
+        logger.info('{0}'.format(msg))
+
+def get_user_info(user):
+    try:
+        user_system = getpwnam(user)
+    except KeyError:
+        raise CgroupsException("User %s doesn't exists" % user)
+    else:
+        uid = user_system.pw_uid
+        gid = user_system.pw_gid
