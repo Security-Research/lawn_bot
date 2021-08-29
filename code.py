@@ -61,39 +61,3 @@ def tracing_analysis():
             msg="{0} 과 {1} 앱의 Syscall 유사도는 {2} % 입니다.".format(base_file.replace(".syscall.result",''),target_file.replace(".syscall.result",''),round(percent,2))
             analysis(msg)
 
-    u_print('-' * 100 + '\n')
-    pass
-
-
-
-def get_syscall_list(name):
-    syscall_list=[]
-    #print('.tmp/'+str(name))
-    with open('.tmp/'+str(name), 'r') as r:
-        while(True):
-            try:
-                data=r.readline()
-                data=str(data).split(' ')
-                data=(str(data[2]).split('('))
-                syscall_name=data[0]
-                if syscall_name not in syscall_list:
-                #$print(syscall_name)
-                    syscall_list.append(syscall_name)
-                if data=='':
-                    break
-            except:
-                break
-    return (syscall_list)
-
-
-
-def tracing(target,pid,kill_time):
-    t = threading.Thread(target=(tracing_syscall), args=(target,pid,kill_time,))
-    t.start()
-
-
-def tracing_syscall(target,pid,kill_time):
-    SYSCALL_CMD = "-p {0} -t {1} -o {2}/{3}".format(int(pid)+2,kill_time,'.tmp',target+".syscall")
-    os.system('./core/syscall ' + str(SYSCALL_CMD))
-    time.sleep(kill_time)
-    syscall_info=(get_syscall_list(target + '.syscall'))
