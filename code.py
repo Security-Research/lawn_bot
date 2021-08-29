@@ -1,18 +1,21 @@
-import argparse
+from utils.parsing import get_app_list
+from core.run import run_app
+from utils.out import info,warning,critical
+from core.cgroups import Cgroup
+from utils.out import warning,u_print,critical,analysis,bold_print
+import os
+from utils.parsing import finder
+import time
+import json
 
-from core.report import report
-from core.manager import reset
-from core.execute import execute
 
+def resource_usage(app_name,pid):
 
-def isint(a):
+    cg=Cgroup(app_name)
+    cg.add_process(app_name,pid)
+    usage_list={'cache':[], 'rss':[],'usage':[], 'failcnt':[],'pgpgin':[], 'pgpgout':[]}
 
-    if int(a):
-        return 1
-    else:
-        return 0
-
-def get_arguments():
-    return [
-    ("--start", "Start a Thermometer deamon"),
-    ("--reporter", "Get a reporter"),
+    cnt =0
+    for i in range(10):
+        usage_list['cache'].append(cg.get_memory_stat(app_name,'cache')) #byte
+        usage_list['rss'].append(cg.get_memory_stat(app_name,'rss')) #byte
