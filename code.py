@@ -1,12 +1,18 @@
+import argparse
 
-import os
-def get_app_list():
-    path_dir='./testing_app'
-    file_list = os.listdir(path_dir)
-    python_list=[]
-    for file_name in file_list:
-        if finder(file_name,'.py') and not finder(file_name,'__init__'):
-            python_list.append(file_name)
-    return (python_list)
+from core.report import report
+from core.manager import reset
+from core.execute import execute
 
-def finder(target,ob):
+
+def isint(a):
+
+    if int(a):
+        return 1
+    else:
+        return 0
+
+def get_arguments():
+    return [
+    ("--start", "Start a Thermometer deamon"),
+    ("--reporter", "Get a reporter"),
