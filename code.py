@@ -1,21 +1,25 @@
-#! /usr/python3
-# -*- coding:utf-8 -*-
+from utils.parsing import get_app_list
+from core.run import run_app
+from utils.out import info,warning,critical,analysis
+from core.lib_analysis import lib_analysis,similarity
+from core.tracing import tracing
+#commands()
+import os,subprocess,signal
+import sys
+import json,time
+from core.tracing import tracing_analysis
+from core.dy_tracing import dy_tracing_analysis
 
-import os,sys
-import logging
-from pwd import getpwnam
+from core.manager import init
+from core.resource import resource_usage, res_analysis
+import threading
+from tqdm import trange
 
-from utils.exception import CgroupsException,BASE_CGROUPS
+def prog(times):
+    analysis('Estimated time :'+str(times*0.9) +'s')
+    progress(times)
+    #tv = threading.Thread(target=(progress), args=(times,))
+    #tv.start()
 
-logger = logging.getLogger(__name__)
-
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logstream = logging.StreamHandler()
-logstream.setFormatter(formatter)
-logger.addHandler(logstream)
-logger.setLevel(logging.INFO)
-def log(type,msg):
-    if type=='INFO':
-        logger.info('{0}'.format(msg))
-    elif type=='WARN':
+def progress(times):
+    for i in trange(times*90):
